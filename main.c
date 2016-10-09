@@ -15,6 +15,7 @@ void read_command_parameters();
 void main(int argc, char *argv[]) {
 
 	int status;
+	char *arguements[20];
 
 	while(TRUE) {
 
@@ -27,6 +28,9 @@ void main(int argc, char *argv[]) {
 			//child
 			4 + 5;	
 			printf("Inside the child process\n");	
+			//execv("/bin/ls", arguements); THIS IS AN EXAMPLE
+			//arguemetns[0] = program;
+			//execv("/bin/ls", mpla);
 		}else{
 			//parent code
 			printf("Inside the parent process\n");
