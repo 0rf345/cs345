@@ -10,17 +10,26 @@
 
 void type_prompt(void);
 
-void read_command_parameters();
+void read_command_parameters(char **arguments);
+
+void tokenize(char *line, char **arguments);
+
+int stringCounter(char **arguments);
 
 void main(int argc, char *argv[]) {
 
 	int status;
-	char *arguements[20];
+	char *arguments[1000];
+	int numOfArguments;
 
 	while(TRUE) {
 
+		numOfArguments = 0;
+
 		type_prompt();
-		read_command_parameters();
+		read_command_parameters(arguments);
+		
+		numOfArguments = stringCounter(arguments);
 
 		pid_t child_pid = fork();
 
@@ -28,9 +37,8 @@ void main(int argc, char *argv[]) {
 			//child
 			4 + 5;	
 			printf("Inside the child process\n");	
-			//execv("/bin/ls", arguements); THIS IS AN EXAMPLE
-			//arguemetns[0] = program;
-			//execv("/bin/ls", mpla);
+			//execv("/bin/ls", arguments); THIS IS AN EXAMPLE
+			//argumetns[0] = program;
 		}else{
 			//parent code
 			printf("Inside the parent process\n");
@@ -53,11 +61,32 @@ void type_prompt(void) {
 	}
 }
 
-void read_command_parameters() {
+/*
+	line will be used to store what 
+	the user inputs in our program
+*/
+void read_command_parameters(char **arguments) {
 	char *line;
-	line = NULL;
 	size_t len = 0;
 
 	getline(&line, &len, stdin);
+	tokenize(line, arguments);
+}
 
+// Splits line into strings by usins ' ' as separators
+void tokenize(char *line, char **arguments) {
+	int i = 0;
+	arguments[i] = strtok(line, " ");	
+	while(arguments[i] != NULL) {
+		i++;
+		arguments[i] = strtok(NULL, " ");
+	}
+}
+
+// Returns how many strings are contained in arguments
+int stringCounter(char **arguments) {
+	int i = 0;
+	while(arguments[i] != NULL)
+		i++;
+	return i;
 }
