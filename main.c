@@ -9,27 +9,20 @@
 #define TRUE 1
 
 void type_prompt(void);
-
 void read_command_parameters(char **arguments);
-
 void tokenize(char *line, char **arguments);
-
 int stringCounter(char **arguments);
-
-void unify(char *dest, char *src);
 
 void main(int argc, char *argv[]) {
 
 	int status;
 	char *arguments[1000];
 	int numOfArguments;
-	char *path1, *path2;
+	char *path;
 
-	path1 = (char*)malloc(sizeof(char) * 1000);
-	path2 = (char*)malloc(sizeof(char) * 1000);
+	path = (char*)malloc(sizeof(char) * 1000);
 
-	strcpy(path1, "/bin/");
-//	strcpy(path2, "/usr/bin/");
+	strcpy(path, "/bin/");
 
 	while(TRUE) {
 
@@ -47,12 +40,12 @@ void main(int argc, char *argv[]) {
 
 		pid_t child_pid = fork();
 
-		strcpy(&path1[5], arguments[0]);
+		strcpy(&path[5], arguments[0]);
+		strcpy(arguments[0], path);
 
-		strcpy(arguments[0], path1);
 		if(child_pid == 0) {
 			printf("Inside the child process\n");	
-			execv(path1, arguments);
+			execv(arguments[0], arguments);
 			printf("Something failed with execv\n");
 		}else{
 			printf("Inside the parent process\n");
@@ -130,10 +123,4 @@ int stringCounter(char **arguments) {
 	while(arguments[i] != NULL)
 		i++;
 	return i;
-}
-
-void unNull(char* str) {
-	int i = 0;
-	while(str[i] != '\0') i++;
-	str[i] = str[i + 1];
 }
