@@ -16,11 +16,20 @@ void tokenize(char *line, char **arguments);
 
 int stringCounter(char **arguments);
 
+void unify(char *dest, char *src);
+
 void main(int argc, char *argv[]) {
 
 	int status;
 	char *arguments[1000];
 	int numOfArguments;
+	char *path1, *path2;
+
+	path1 = (char*)malloc(sizeof(char) * 1000);
+	path2 = (char*)malloc(sizeof(char) * 1000);
+
+	strcpy(path1, "/bin/");
+//	strcpy(path2, "/usr/bin/");
 
 	while(TRUE) {
 
@@ -30,19 +39,30 @@ void main(int argc, char *argv[]) {
 		read_command_parameters(arguments);
 		
 		numOfArguments = stringCounter(arguments);
+	
+		if(strcmp(arguments[0], "exit") == 0) {
+			printf("Thank you for using cs345sh :)\n");
+			return;
+		}
 
 		pid_t child_pid = fork();
 
+		strcpy(&path1[5], arguments[0]);
+
+		strcpy(arguments[0], path1);
 		if(child_pid == 0) {
-			//child
-			4 + 5;	
 			printf("Inside the child process\n");	
-			//execv("/bin/ls", arguments); THIS IS AN EXAMPLE
-			//argumetns[0] = program;
+			execv(path1, arguments);
+			printf("Something failed with execv\n");
 		}else{
-			//parent code
 			printf("Inside the parent process\n");
 			wait(&status);
+			int h = 0;
+			while(1) {
+				if(arguments[h] == NULL) break;
+				arguments[h] = NULL;
+				h++;
+			}
 		}
 		
 	}
@@ -70,16 +90,37 @@ void read_command_parameters(char **arguments) {
 	size_t len = 0;
 
 	getline(&line, &len, stdin);
+	int i;
+	for(i = 0;;i++) {
+		if(line[i] == '\n') {
+			line[i] = '\0';
+			break;
+		}
+	}
 	tokenize(line, arguments);
 }
 
 // Splits line into strings by usins ' ' as separators
 void tokenize(char *line, char **arguments) {
-	int i = 0;
-	arguments[i] = strtok(line, " ");	
-	while(arguments[i] != NULL) {
-		i++;
-		arguments[i] = strtok(NULL, " ");
+	int i;
+	i = 0;
+	int j, k;
+	j = k = 0;
+	arguments[0] = (char*)malloc(sizeof(char) * 200);
+	while(TRUE) {
+		if(line[i] == '\0') {
+			arguments[j][k] = '\0';
+			break;
+		}else if(line[i] == ' ') {
+			arguments[j][k] = '\0';
+			k = 0;
+			j++;
+			arguments[j] = (char*)malloc(sizeof(char) * 200);
+		}else{
+			arguments[j][k] = line[i];
+			k++;
+		}
+		i++;	
 	}
 }
 
@@ -89,4 +130,10 @@ int stringCounter(char **arguments) {
 	while(arguments[i] != NULL)
 		i++;
 	return i;
+}
+
+void unNull(char* str) {
+	int i = 0;
+	while(str[i] != '\0') i++;
+	str[i] = str[i + 1];
 }
