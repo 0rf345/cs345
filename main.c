@@ -13,7 +13,7 @@ void type_prompt(void);
 void read_command_parameters(char **arguments);
 void tokenize(char *line, char **arguments);
 int stringCounter(char **arguments);
-int checkPipe(char **arguments, int num);
+int checkSpecial(char **arguments, int num, char *special);
 void nullify(char **arguments, int num);
 int countLetters(char* str);
 
@@ -32,11 +32,34 @@ void main(int argc, char *argv[]) {
 		
 		numOfArguments = stringCounter(arguments);
 
-		int pipe_pos;
-		pipe_pos = checkPipe(arguments, numOfArguments);
-		
+		int pipe_pos, out_pos;
+		pipe_pos = -1;
+		out_pos = -1;
+		pipe_pos = checkSpecial(arguments, numOfArguments, "|");
+		out_pos = checkSpecial(arguments, numOfArguments, ">");
 		int lastC = countLetters(arguments[0]);
-		if(arguments[0][lastC - 1] == '&') {
+		if(strcmp(arguments[0], "exit") == 0) {
+			printf("Thank you for using cs345sh :)\n");
+			return;
+		}else if(out_pos != -1) {
+			char *tempArgs[out_pos + 1];
+			int i;
+			for(i = 0; i < out_pos; i++)
+				tempArgs[i] = arguments[i];
+			tempArgs[out_pos] = NULL;
+			FILE *fp;
+			fp = fopen(arguments[out_pos + 1], "w+");
+			int fd = fileno(fp);
+			pid_t child_pid = fork();
+			if(child_pid == 0) {
+				dup2(fd, 1);
+				execvp(tempArgs[0], tempArgs);
+			}else{
+				wait(&status);
+				fclose(fp);
+				nullify(arguments, numOfArguments);
+			}
+		}else if(arguments[0][lastC - 1] == '&') {
 			arguments[0][lastC - 1] = '\0';
 			pid_t child_pid = fork();
 			if(child_pid == 0) {
@@ -48,9 +71,6 @@ void main(int argc, char *argv[]) {
 				printf("is now running in the background\n");
 				nullify(arguments, numOfArguments);
 			}
-		}else if(strcmp(arguments[0], "exit") == 0) {
-			printf("Thank you for using cs345sh :)\n");
-			return;
 		}else if(strcmp(arguments[0], "cd") == 0) {
 			chdir(arguments[1]);
 			nullify(arguments, numOfArguments);
@@ -100,10 +120,10 @@ void main(int argc, char *argv[]) {
 	returns its position if found
 	returns -1 if NOT found
 */
-int checkPipe(char **arguments, int num) {
+int checkSpecial(char **arguments, int num, char *special) {
 	int i;
 	for(i = 0; i < num; i++) {
-		if(strcmp(arguments[i], "|") == 0)
+		if(strcmp(arguments[i], special) == 0)
 			return i;
 	}
 	return -1;
