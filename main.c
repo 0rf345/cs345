@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 
 #define TRUE 1
+#define FALSE 0
 
 void type_prompt(void);
 void read_command_parameters(char **arguments);
@@ -29,25 +30,23 @@ void main(int argc, char *argv[]) {
 		read_command_parameters(arguments);
 		
 		numOfArguments = stringCounter(arguments);
+
+		int pipe_pos;
+		pipe_pos = checkPipe(arguments, numOfArguments);
 	
 		if(strcmp(arguments[0], "exit") == 0) {
 			printf("Thank you for using cs345sh :)\n");
 			exit(EXIT_SUCCESS);
-		}
-		
-		int pipe_pos;
-		pipe_pos = checkPipe(arguments, numOfArguments);
-	
-	
-		if(pipe_pos == -1) {
+		}else if(strcmp(arguments[0], "cd") == 0) {
+			chdir(arguments[1]);
+			nullify(arguments, numOfArguments);
+		} else if(pipe_pos == -1) {
 			pid_t child_pid = fork();
 
 			if(child_pid == 0) {
-				printf("Inside the child process\n");	
 				execvp(arguments[0], arguments);
 				printf("Could not find command %s\n", arguments[0]);
 			}else{
-				printf("Inside the parent process\n");
 				wait(&status);
 				nullify(arguments, numOfArguments);				
 			}
