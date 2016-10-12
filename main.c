@@ -18,11 +18,6 @@ void main(int argc, char *argv[]) {
 	int status;
 	char *arguments[1000];
 	int numOfArguments;
-	char *path;
-
-	path = (char*)malloc(sizeof(char) * 1000);
-
-	strcpy(path, "/bin/");
 
 	while(TRUE) {
 
@@ -35,17 +30,14 @@ void main(int argc, char *argv[]) {
 	
 		if(strcmp(arguments[0], "exit") == 0) {
 			printf("Thank you for using cs345sh :)\n");
-			return;
+			exit(EXIT_SUCCESS);
 		}
 
 		pid_t child_pid = fork();
 
-		strcpy(&path[5], arguments[0]);
-		strcpy(arguments[0], path);
-
 		if(child_pid == 0) {
 			printf("Inside the child process\n");	
-			execv(arguments[0], arguments);
+			execvp(arguments[0], arguments);
 			printf("Something failed with execv\n");
 		}else{
 			printf("Inside the parent process\n");
