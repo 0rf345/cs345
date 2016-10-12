@@ -12,6 +12,8 @@ void type_prompt(void);
 void read_command_parameters(char **arguments);
 void tokenize(char *line, char **arguments);
 int stringCounter(char **arguments);
+int checkPipe(char **arguments, int num);
+void nullify(char **arguments, int num);
 
 void main(int argc, char *argv[]) {
 
@@ -32,26 +34,65 @@ void main(int argc, char *argv[]) {
 			printf("Thank you for using cs345sh :)\n");
 			exit(EXIT_SUCCESS);
 		}
-
-		pid_t child_pid = fork();
-
-		if(child_pid == 0) {
-			printf("Inside the child process\n");	
-			execvp(arguments[0], arguments);
-			printf("Something failed with execv\n");
-		}else{
-			printf("Inside the parent process\n");
-			wait(&status);
-			int h = 0;
-			while(1) {
-				if(arguments[h] == NULL) break;
-				arguments[h] = NULL;
-				h++;
-			}
-		}
 		
+		int pipe_pos;
+		pipe_pos = checkPipe(arguments, numOfArguments);
+	
+	
+		if(pipe_pos == -1) {
+			pid_t child_pid = fork();
+
+			if(child_pid == 0) {
+				printf("Inside the child process\n");	
+				execvp(arguments[0], arguments);
+				printf("Could not find command %s\n", arguments[0]);
+			}else{
+				printf("Inside the parent process\n");
+				wait(&status);
+				nullify(arguments, numOfArguments);				
+			}
+		}else{
+		pid_t child_pid = fork();
+			if(child_pid == 0) {
+				int pipefd[2];
+				pipe(pipefd);
+				pid_t nested_pid = fork();
+	
+				if(nested_pid == 0) {
+					dup2(pipefd[0], 0);
+					close(pipefd[1]);
+					execvp(arguments[pipe_pos + 1], &arguments[pipe_pos + 1]);
+				}else{
+					dup2(pipefd[1], 1);
+					close(pipefd[0]);
+					char *tempArgs[pipe_pos + 1];
+					int i;
+					for(i = 0; i < pipe_pos; i++)
+						tempArgs[i] = arguments[i];
+					tempArgs[pipe_pos] = NULL;
+					execvp(tempArgs[0], tempArgs);
+				}	
+			}else{
+				wait(&status);
+				nullify(arguments, numOfArguments);
+			}
+		}	
 	}
 
+}
+
+/*
+	Checks if there is '|' in the arguments
+	returns its position if found
+	returns -1 if NOT found
+*/
+int checkPipe(char **arguments, int num) {
+	int i;
+	for(i = 0; i < num; i++) {
+		if(strcmp(arguments[i], "|") == 0)
+			return i;
+	}
+	return -1;
 }
 
 void type_prompt(void) {
@@ -115,4 +156,11 @@ int stringCounter(char **arguments) {
 	while(arguments[i] != NULL)
 		i++;
 	return i;
+}
+
+// nullifies arguments array
+void nullify(char **arguments, int num) {
+	int i;
+	for(i = 0; i < num; i++)
+		arguments[i] = NULL;
 }
