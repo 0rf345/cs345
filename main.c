@@ -32,17 +32,38 @@ void main(int argc, char *argv[]) {
 		
 		numOfArguments = stringCounter(arguments);
 
-		int pipe_pos, out_pos, app_pos;
+		int pipe_pos, out_pos, app_pos, in_pos;
 		pipe_pos = -1;
 		out_pos = -1;
 		app_pos = -1;
+		in_pos = -1;
 		pipe_pos = checkSpecial(arguments, numOfArguments, "|");
 		out_pos = checkSpecial(arguments, numOfArguments, ">");
 		app_pos = checkSpecial(arguments, numOfArguments, ">>");
+		in_pos = checkSpecial(arguments, numOfArguments, "<");
 		int lastC = countLetters(arguments[0]);
 		if(strcmp(arguments[0], "exit") == 0) {
 			printf("Thank you for using cs345sh :)\n");
 			return;
+		}else if(in_pos != -1) {
+			char *tempArgs[in_pos + 1];
+			int i;
+			for(i = 0; i < in_pos; i++)
+				tempArgs[i] = arguments[i];
+			tempArgs[in_pos] = NULL;
+			FILE *fp;
+			fp = fopen (arguments[in_pos + 1], "r");
+			int fd = fileno(fp);
+
+			pid_t child_pid = fork();
+			if(child_pid == 0) {
+				dup2(fd, 0);
+				execvp(tempArgs[0], tempArgs);
+			}else{
+				wait(&status);
+				fclose(fp);
+				nullify(arguments, numOfArguments);
+			}
 		}else if(out_pos != -1 || app_pos != -1) {
 			char **tempArgs;
 			int max = app_pos;
