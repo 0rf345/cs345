@@ -32,23 +32,40 @@ void main(int argc, char *argv[]) {
 		
 		numOfArguments = stringCounter(arguments);
 
-		int pipe_pos, out_pos;
+		int pipe_pos, out_pos, app_pos;
 		pipe_pos = -1;
 		out_pos = -1;
+		app_pos = -1;
 		pipe_pos = checkSpecial(arguments, numOfArguments, "|");
 		out_pos = checkSpecial(arguments, numOfArguments, ">");
+		app_pos = checkSpecial(arguments, numOfArguments, ">>");
 		int lastC = countLetters(arguments[0]);
 		if(strcmp(arguments[0], "exit") == 0) {
 			printf("Thank you for using cs345sh :)\n");
 			return;
-		}else if(out_pos != -1) {
-			char *tempArgs[out_pos + 1];
+		}else if(out_pos != -1 || app_pos != -1) {
+			char **tempArgs;
+			int max = app_pos;
+			if(out_pos > app_pos) max = out_pos;
+			tempArgs = (char**)malloc((sizeof(char*) * max + 1));
 			int i;
-			for(i = 0; i < out_pos; i++)
-				tempArgs[i] = arguments[i];
-			tempArgs[out_pos] = NULL;
+			
+				for(i = 0; i < out_pos; i++)
+					tempArgs[i] = arguments[i];
+			
+				tempArgs[out_pos] = NULL;
+
 			FILE *fp;
-			fp = fopen(arguments[out_pos + 1], "w+");
+			// Write
+			if(strcmp(arguments[out_pos], ">") == 0) 
+				fp = fopen(arguments[out_pos + 1], "w+");
+			// Append
+			else
+				fp = fopen(arguments[app_pos + 1], "a");
+			for(i = 0; i < max; i++)
+				tempArgs[i] = arguments[i];
+			tempArgs[max] = NULL;
+
 			int fd = fileno(fp);
 			pid_t child_pid = fork();
 			if(child_pid == 0) {
