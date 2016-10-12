@@ -33,10 +33,7 @@ void main(int argc, char *argv[]) {
 		numOfArguments = stringCounter(arguments);
 
 		int pipe_pos, out_pos, app_pos, in_pos;
-		pipe_pos = -1;
-		out_pos = -1;
-		app_pos = -1;
-		in_pos = -1;
+		pipe_pos = out_pos = app_pos = in_pos = -1;
 		pipe_pos = checkSpecial(arguments, numOfArguments, "|");
 		out_pos = checkSpecial(arguments, numOfArguments, ">");
 		app_pos = checkSpecial(arguments, numOfArguments, ">>");
@@ -45,52 +42,33 @@ void main(int argc, char *argv[]) {
 		if(strcmp(arguments[0], "exit") == 0) {
 			printf("Thank you for using cs345sh :)\n");
 			return;
-		}else if(in_pos != -1) {
-			char *tempArgs[in_pos + 1];
-			int i;
-			for(i = 0; i < in_pos; i++)
-				tempArgs[i] = arguments[i];
-			tempArgs[in_pos] = NULL;
-			FILE *fp;
-			fp = fopen (arguments[in_pos + 1], "r");
-			int fd = fileno(fp);
-
-			pid_t child_pid = fork();
-			if(child_pid == 0) {
-				dup2(fd, 0);
-				execvp(tempArgs[0], tempArgs);
-			}else{
-				wait(&status);
-				fclose(fp);
-				nullify(arguments, numOfArguments);
-			}
-		}else if(out_pos != -1 || app_pos != -1) {
+		}else if(out_pos != -1 || app_pos != -1 || in_pos != -1) {
 			char **tempArgs;
 			int max = app_pos;
-			if(out_pos > app_pos) max = out_pos;
-			tempArgs = (char**)malloc((sizeof(char*) * max + 1));
+			if(out_pos > max) max = out_pos;
+			if(in_pos > max)max = in_pos;
+			tempArgs = (char**)malloc(((sizeof(char*) * max) + 1));
 			int i;
-			
-				for(i = 0; i < out_pos; i++)
-					tempArgs[i] = arguments[i];
-			
-				tempArgs[out_pos] = NULL;
-
-			FILE *fp;
-			// Write
-			if(strcmp(arguments[out_pos], ">") == 0) 
-				fp = fopen(arguments[out_pos + 1], "w+");
-			// Append
-			else
-				fp = fopen(arguments[app_pos + 1], "a");
 			for(i = 0; i < max; i++)
 				tempArgs[i] = arguments[i];
 			tempArgs[max] = NULL;
 
+			FILE *fp;
+			// Write
+			if(out_pos != -1) 
+				fp = fopen(arguments[out_pos + 1], "w+");
+			// Append
+			else if(app_pos != -1)
+				fp = fopen(arguments[app_pos + 1], "a");
+			// Read
+			else
+				fp = fopen(arguments[in_pos + 1], "r");
+
 			int fd = fileno(fp);
 			pid_t child_pid = fork();
 			if(child_pid == 0) {
-				dup2(fd, 1);
+				if(in_pos != -1) dup2(fd, 0);
+				else dup2(fd, 1);
 				execvp(tempArgs[0], tempArgs);
 			}else{
 				wait(&status);
