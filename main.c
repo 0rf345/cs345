@@ -15,6 +15,7 @@ void tokenize(char *line, char **arguments);
 int stringCounter(char **arguments);
 int checkPipe(char **arguments, int num);
 void nullify(char **arguments, int num);
+int countLetters(char* str);
 
 void main(int argc, char *argv[]) {
 
@@ -33,14 +34,27 @@ void main(int argc, char *argv[]) {
 
 		int pipe_pos;
 		pipe_pos = checkPipe(arguments, numOfArguments);
-	
-		if(strcmp(arguments[0], "exit") == 0) {
+		
+		int lastC = countLetters(arguments[0]);
+		if(arguments[0][lastC - 1] == '&') {
+			arguments[0][lastC - 1] = '\0';
+			pid_t child_pid = fork();
+			if(child_pid == 0) {
+				setpgid(0, 0);
+				execvp(arguments[0], arguments);
+				printf("Could not find command %s\n", arguments[0]);
+			}else{
+				printf("Process %s with pid %d ", arguments[0], child_pid);
+				printf("is now running in the background\n");
+				nullify(arguments, numOfArguments);
+			}
+		}else if(strcmp(arguments[0], "exit") == 0) {
 			printf("Thank you for using cs345sh :)\n");
-			exit(EXIT_SUCCESS);
+			return;
 		}else if(strcmp(arguments[0], "cd") == 0) {
 			chdir(arguments[1]);
 			nullify(arguments, numOfArguments);
-		} else if(pipe_pos == -1) {
+		}else if(pipe_pos == -1) {
 			pid_t child_pid = fork();
 
 			if(child_pid == 0) {
@@ -50,8 +64,9 @@ void main(int argc, char *argv[]) {
 				wait(&status);
 				nullify(arguments, numOfArguments);				
 			}
+		// PIPE detected
 		}else{
-		pid_t child_pid = fork();
+			pid_t child_pid = fork();
 			if(child_pid == 0) {
 				int pipefd[2];
 				pipe(pipefd);
@@ -162,4 +177,13 @@ void nullify(char **arguments, int num) {
 	int i;
 	for(i = 0; i < num; i++)
 		arguments[i] = NULL;
+}
+
+int countLetters(char *str) {
+	int i;
+	i = 0;
+	while(1) {
+		if(str[i] == '\0') return i;
+		i++;
+	}
 }
