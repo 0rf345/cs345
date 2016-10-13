@@ -322,7 +322,9 @@ void parseUnset(struct varBoard *sentinel, char *varKey) {
 	while(1) {
 		if(traverse->next == NULL) break;
 		if(strcmp(traverse -> next->varKey, varKey) == 0) {
+			struct varBoard *temp = traverse->next;
 			traverse->next = traverse->next->next;
+			free(temp);
 			break;
 		}
 		traverse = traverse->next;
