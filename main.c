@@ -5,9 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#include "helper.h"
 
 #define TRUE 1
 #define FALSE 0
+#define ARG_LIMIT 1000
+#define VAR_LIMIT 100
 
 void type_prompt(void);
 void read_command_parameters(char **arguments);
@@ -16,11 +19,20 @@ int stringCounter(char **arguments);
 int checkSpecial(char **arguments, int num, char *special);
 void nullify(char **arguments, int num);
 int countLetters(char* str);
-
+void parseSet(struct varBoard *sentinel, char **arguments, int num);
+void parseUnset(struct varBoard *sentinel, char *varKey);
+void printLvars(struct varBoard *sentinel);
+int howMany(char mpla[100][100]);
 void main(int argc, char *argv[]) {
 
 	int status;
-	char *arguments[1000];
+	char *arguments[ARG_LIMIT];
+	char *varKeys[VAR_LIMIT];
+	char **varVals[VAR_LIMIT];
+	struct varBoard sentinel;
+	strcpy(sentinel.varKey, "sentinel");
+	sentinel.next = NULL;
+
 	int numOfArguments;
 
 	while(TRUE) {
@@ -42,6 +54,20 @@ void main(int argc, char *argv[]) {
 		if(strcmp(arguments[0], "exit") == 0) {
 			printf("Thank you for using cs345sh :)\n");
 			return;
+		}else if(strcmp(arguments[0], "set") == 0) {
+			parseSet(&sentinel, arguments, numOfArguments);
+			nullify(arguments, numOfArguments);
+		}else if(strcmp(arguments[0], "unset") == 0) {
+			if(arguments[1] != NULL) {
+				parseUnset(&sentinel, arguments[1]);
+				nullify(arguments, numOfArguments);
+			}else{
+				printf("What should I unset?\n");
+				exit(EXIT_FAILURE);
+			}
+		}else if(strcmp(arguments[0], "printlvars") == 0) {
+			printLvars(&sentinel);
+			nullify(arguments, numOfArguments);
 		}else if(out_pos != -1 || app_pos != -1 || in_pos != -1) {
 			char **tempArgs;
 			int max = app_pos;
@@ -221,5 +247,125 @@ int countLetters(char *str) {
 	while(1) {
 		if(str[i] == '\0') return i;
 		i++;
+	}
+}
+
+// set var
+void parseSet(struct varBoard *sentinel, char **arguments, int num) {
+	char *var = (char*)malloc(sizeof(char) * 100);
+	int i = 0;
+	while(1) {
+		var[i] = arguments[1][i];
+		i++;
+		if(arguments[1][i] == '=') 	
+			break;
+	}
+	var[i] = '\0';
+
+	char *newArgs[num];
+	// jump "
+	i += 2;
+	int j = 0;
+	newArgs[0] = (char*)malloc(sizeof(char) * 100);
+	while(1) {
+		if(arguments[1][i] == '\"') {
+			newArgs[0][j] = '\0';
+			break;
+		}
+		newArgs[0][j] = arguments[1][i];
+		j++;
+		i++;
+		if(newArgs[0][j-1] == '\0') break;
+	}
+	i = 2;
+	j = 1;
+	while(i < (num - 1)) {
+		newArgs[j] = (char*)malloc(sizeof(char) * 100);
+		strcpy(newArgs[j], arguments[i]);
+		j++;
+		i++;
+	}
+	// last argument
+	newArgs[j] = (char *)malloc(sizeof(char) * 100);
+	int k = 0;
+	while(1) {
+		newArgs[j][k] = arguments[num - 1][k];
+		k++;
+		if(arguments[num - 1][k] == '\"') {
+			newArgs[j][k] = '\0';
+			break;
+		}
+	}
+	newArgs[num - 1] = NULL;
+
+	struct varBoard *traverse = sentinel;
+	int same = 0;
+	while(1) {
+		if(traverse->next == NULL) break;
+		if(strcmp(traverse->next->varKey, var) == 0) break;
+		traverse = traverse->next;
+	}
+	// TOD  next for sameO
+	traverse->next = (struct varBoard*)malloc(sizeof(struct varBoard));
+	strcpy(traverse->next->varKey, var);
+	for(i = 0; i < num - 1; i++)
+		strcpy(traverse->next->varVal[i], newArgs[i]);
+}
+
+void parseUnset(struct varBoard *sentinel, char *varKey) {
+	struct varBoard *traverse;
+	while(1) {
+		if(traverse -> next == NULL) break;
+		if(strcmp(traverse -> next->varKey, varKey) == 0) {
+			struct varBoard *temp = traverse->next;
+			traverse->next = traverse->next->next;
+			free(temp);
+			break;
+		}
+		traverse = traverse->next;
+	}
+}
+
+int howMany(char mpla[100][100]) {
+	int i = 0;
+	while(1) {
+		if(mpla[i] == NULL) return i - 1;
+		i++;
+	}
+}
+
+void printLvars(struct varBoard *sentinel) {
+	struct varBoard *traverse = sentinel;
+	traverse = traverse->next;
+	while(traverse != NULL) {
+		printf("%s=", traverse->varKey);
+	
+		// there is some inexcpicable ghost when I am trying to do this
+		// in a loop so I limit it to 20 args which is more than
+		// reasonable amount of arguments	
+		if(traverse->varVal[0]) printf("%s ", traverse->varVal[0]);
+		if(traverse->varVal[1]) printf("%s ", traverse->varVal[1]);
+		if(traverse->varVal[2]) printf("%s ", traverse->varVal[2]);
+		if(traverse->varVal[3]) printf("%s ", traverse->varVal[3]);
+		if(traverse->varVal[4]) printf("%s ", traverse->varVal[4]);
+		if(traverse->varVal[5]) printf("%s ", traverse->varVal[5]);
+		if(traverse->varVal[6]) printf("%s ", traverse->varVal[6]);
+		if(traverse->varVal[7]) printf("%s ", traverse->varVal[7]);
+		if(traverse->varVal[8]) printf("%s ", traverse->varVal[8]);
+		if(traverse->varVal[9]) printf("%s ", traverse->varVal[9]);
+		if(traverse->varVal[10]) printf("%s ", traverse->varVal[10]);
+		if(traverse->varVal[11]) printf("%s ", traverse->varVal[11]);
+		if(traverse->varVal[12]) printf("%s ", traverse->varVal[12]);
+		if(traverse->varVal[13]) printf("%s ", traverse->varVal[13]);
+		if(traverse->varVal[14]) printf("%s ", traverse->varVal[14]);
+		if(traverse->varVal[15]) printf("%s ", traverse->varVal[15]);
+		if(traverse->varVal[16]) printf("%s ", traverse->varVal[16]);
+		if(traverse->varVal[17]) printf("%s ", traverse->varVal[17]);
+		if(traverse->varVal[18]) printf("%s ", traverse->varVal[18]);
+		if(traverse->varVal[19]) printf("%s ", traverse->varVal[19]);
+		if(traverse->varVal[20]) printf("%s ", traverse->varVal[20]);
+		if(traverse->varVal[21]) printf("%s ", traverse->varVal[21]);
+		printf("\n");
+		traverse = traverse->next;
 	}
 }
