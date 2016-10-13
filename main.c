@@ -313,8 +313,8 @@ void parseSet(struct varBoard *sentinel, char **arguments, int num) {
 	traverse->next = (struct varBoard*)malloc(sizeof(struct varBoard));
 	strcpy(traverse->next->varKey, var);
 	for(i = 0; i < num - 1; i++)
-		strcpy(traverse->next->varVal[i], newArgs[i]);
-	strcpy(traverse->next->varVal[num - 1], "\0");
+		strcpy((char*)(traverse->next->varVal[i]), newArgs[i]);
+	strcpy((char*)traverse->next->varVal[num - 1], "\0");
 }
 
 void parseUnset(struct varBoard *sentinel, char *varKey) {
@@ -384,7 +384,7 @@ void parseVars(char **arguments, struct varBoard *sentinel) {
 	int i = 0;
 	while(traverse->varVal[i][0] != '\0') {
 		arguments[i] = (char*)malloc(sizeof(char) * 100);
-		strcpy(arguments[i], traverse->varVal[i]);
+		strcpy(arguments[i], (char*)(traverse->varVal[i]));
 		i++;
 	}
 	return;
