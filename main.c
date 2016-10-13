@@ -310,6 +310,7 @@ void parseSet(struct varBoard *sentinel, char **arguments, int num) {
 	strcpy(traverse->next->varKey, var);
 	for(i = 0; i < num - 1; i++)
 		strcpy(traverse->next->varVal[i], newArgs[i]);
+	strcpy(traverse->next->varVal[num - 1], "\0");
 }
 
 void parseUnset(struct varBoard *sentinel, char *varKey) {
@@ -326,14 +327,6 @@ void parseUnset(struct varBoard *sentinel, char *varKey) {
 	}
 }
 
-int howMany(char mpla[100][100]) {
-	int i = 0;
-	while(1) {
-		if(mpla[i] == NULL) return i - 1;
-		i++;
-	}
-}
-
 void printLvars(struct varBoard *sentinel) {
 	struct varBoard *traverse = sentinel;
 	traverse = traverse->next;
@@ -342,7 +335,8 @@ void printLvars(struct varBoard *sentinel) {
 	
 		// there is some inexcpicable ghost when I am trying to do this
 		// in a loop so I limit it to 20 args which is more than
-		// reasonable amount of arguments	
+		// reasonable amount of arguments
+		/*	
 		if(traverse->varVal[0]) printf("%s ", traverse->varVal[0]);
 		if(traverse->varVal[1]) printf("%s ", traverse->varVal[1]);
 		if(traverse->varVal[2]) printf("%s ", traverse->varVal[2]);
@@ -365,6 +359,11 @@ void printLvars(struct varBoard *sentinel) {
 		if(traverse->varVal[19]) printf("%s ", traverse->varVal[19]);
 		if(traverse->varVal[20]) printf("%s ", traverse->varVal[20]);
 		if(traverse->varVal[21]) printf("%s ", traverse->varVal[21]);
+		*/
+		int i;
+		for(i = 0; traverse->varVal[i][0] != '\0'; i++) {
+			printf("%s ", traverse->varVal[i]);
+		}
 		printf("\n");
 		traverse = traverse->next;
 	}
