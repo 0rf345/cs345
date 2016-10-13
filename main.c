@@ -366,7 +366,7 @@ void printLvars(struct varBoard *sentinel) {
 		*/
 		int i;
 		for(i = 0; traverse->varVal[i][0] != '\0'; i++) {
-			printf("%s ", traverse->varVal[i]);
+			printf("%s ", (char*)(traverse->varVal[i]));
 		}
 		printf("\n");
 		traverse = traverse->next;
