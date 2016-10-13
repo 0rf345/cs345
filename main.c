@@ -22,7 +22,8 @@ int countLetters(char* str);
 void parseSet(struct varBoard *sentinel, char **arguments, int num);
 void parseUnset(struct varBoard *sentinel, char *varKey);
 void printLvars(struct varBoard *sentinel);
-int howMany(char mpla[100][100]);
+void parseVars(char **arguments, struct varBoard *sentinel);
+
 void main(int argc, char *argv[]) {
 
 	int status;
@@ -51,6 +52,9 @@ void main(int argc, char *argv[]) {
 		app_pos = checkSpecial(arguments, numOfArguments, ">>");
 		in_pos = checkSpecial(arguments, numOfArguments, "<");
 		int lastC = countLetters(arguments[0]);
+		if(numOfArguments == 1) {
+			parseVars(arguments, &sentinel);
+		}
 		if(strcmp(arguments[0], "exit") == 0) {
 			printf("Thank you for using cs345sh :)\n");
 			return;
@@ -314,13 +318,11 @@ void parseSet(struct varBoard *sentinel, char **arguments, int num) {
 }
 
 void parseUnset(struct varBoard *sentinel, char *varKey) {
-	struct varBoard *traverse;
+	struct varBoard *traverse = sentinel;
 	while(1) {
-		if(traverse -> next == NULL) break;
+		if(traverse->next == NULL) break;
 		if(strcmp(traverse -> next->varKey, varKey) == 0) {
-			struct varBoard *temp = traverse->next;
 			traverse->next = traverse->next->next;
-			free(temp);
 			break;
 		}
 		traverse = traverse->next;
@@ -367,4 +369,23 @@ void printLvars(struct varBoard *sentinel) {
 		printf("\n");
 		traverse = traverse->next;
 	}
+}
+
+void parseVars(char **arguments, struct varBoard *sentinel) {
+	struct varBoard *traverse = sentinel;
+	int found = 0;
+	while(traverse = traverse->next) {
+		if(strcmp(traverse->varKey, arguments[0]) == 0) {
+			found = 1;
+			break;
+		}
+	}
+	if(found == 0) return;
+	int i = 0;
+	while(traverse->varVal[i][0] != '\0') {
+		arguments[i] = (char*)malloc(sizeof(char) * 100);
+		strcpy(arguments[i], traverse->varVal[i]);
+		i++;
+	}
+	return;
 }
