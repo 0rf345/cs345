@@ -23,6 +23,7 @@ void parseSet(struct varBoard *sentinel, char **arguments, int num);
 void parseUnset(struct varBoard *sentinel, char *varKey);
 void printLvars(struct varBoard *sentinel);
 void parseVars(char **arguments, struct varBoard *sentinel);
+void printVar(char *var, struct varBoard *sentinel);
 
 void main(int argc, char *argv[]) {
 
@@ -46,7 +47,13 @@ void main(int argc, char *argv[]) {
 		
 		numOfArguments = stringCounter(arguments);
 		
-		if(numOfArguments == 1) {
+		if(numOfArguments == 1 && arguments[0][0] == '$') {
+			int i = 1;
+			while(arguments[0][i] != '\0') {
+				arguments[0][i - 1] = arguments[0][i];
+				i++;
+			}
+			arguments[0][i - 1] = '\0';
 			parseVars(arguments, &sentinel);
 		}
 
@@ -69,6 +76,15 @@ void main(int argc, char *argv[]) {
 				printf("What should I unset?\n");
 				exit(EXIT_FAILURE);
 			}
+		}else if(numOfArguments == 2 && (strcmp((char*)(arguments[0]), "echo") == 0) &&
+			arguments[1][0] == '$') {
+			int i = 1;
+			while(arguments[1][i] != '\0') {
+				arguments[1][i - 1] = arguments[1][i];
+				i++;
+			}
+			arguments[1][i - 1] = '\0';
+			printVar(arguments[1], &sentinel);
 		}else if(strcmp(arguments[0], "printlvars") == 0) {
 			printLvars(&sentinel);
 		}else if(out_pos != -1 || app_pos != -1 || in_pos != -1) {
@@ -337,33 +353,6 @@ void printLvars(struct varBoard *sentinel) {
 	while(traverse != NULL) {
 		printf("%s=", traverse->varKey);
 	
-		// there is some inexcpicable ghost when I am trying to do this
-		// in a loop so I limit it to 20 args which is more than
-		// reasonable amount of arguments
-		/*	
-		if(traverse->varVal[0]) printf("%s ", traverse->varVal[0]);
-		if(traverse->varVal[1]) printf("%s ", traverse->varVal[1]);
-		if(traverse->varVal[2]) printf("%s ", traverse->varVal[2]);
-		if(traverse->varVal[3]) printf("%s ", traverse->varVal[3]);
-		if(traverse->varVal[4]) printf("%s ", traverse->varVal[4]);
-		if(traverse->varVal[5]) printf("%s ", traverse->varVal[5]);
-		if(traverse->varVal[6]) printf("%s ", traverse->varVal[6]);
-		if(traverse->varVal[7]) printf("%s ", traverse->varVal[7]);
-		if(traverse->varVal[8]) printf("%s ", traverse->varVal[8]);
-		if(traverse->varVal[9]) printf("%s ", traverse->varVal[9]);
-		if(traverse->varVal[10]) printf("%s ", traverse->varVal[10]);
-		if(traverse->varVal[11]) printf("%s ", traverse->varVal[11]);
-		if(traverse->varVal[12]) printf("%s ", traverse->varVal[12]);
-		if(traverse->varVal[13]) printf("%s ", traverse->varVal[13]);
-		if(traverse->varVal[14]) printf("%s ", traverse->varVal[14]);
-		if(traverse->varVal[15]) printf("%s ", traverse->varVal[15]);
-		if(traverse->varVal[16]) printf("%s ", traverse->varVal[16]);
-		if(traverse->varVal[17]) printf("%s ", traverse->varVal[17]);
-		if(traverse->varVal[18]) printf("%s ", traverse->varVal[18]);
-		if(traverse->varVal[19]) printf("%s ", traverse->varVal[19]);
-		if(traverse->varVal[20]) printf("%s ", traverse->varVal[20]);
-		if(traverse->varVal[21]) printf("%s ", traverse->varVal[21]);
-		*/
 		int i;
 		for(i = 0; traverse->varVal[i][0] != '\0'; i++) {
 			printf("%s ", (char*)(traverse->varVal[i]));
@@ -390,4 +379,21 @@ void parseVars(char **arguments, struct varBoard *sentinel) {
 		i++;
 	}
 	return;
+}
+
+void printVar(char *var, struct varBoard *sentinel) {
+	struct varBoard *traverse = sentinel;
+	while(traverse = traverse->next) {
+		if(strcmp(var, traverse->varKey) == 0) {
+			printf("%s=", traverse->varKey);
+			int i = 0;
+			while(traverse->varVal[i][0] != '\0') {
+				printf("%s ", traverse->varVal[i]);
+				i++;
+			}
+			printf("\n");
+			return;
+		}
+	}
+	printf("Var \"%s\" not found\n", var);
 }
