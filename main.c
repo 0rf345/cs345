@@ -17,7 +17,7 @@ void read_command_parameters(char **arguments);
 void tokenize(char *line, char **arguments);
 int stringCounter(char **arguments);
 int checkSpecial(char **arguments, int num, char *special);
-void nullify(char **arguments, int num);
+void nullify(char **arguments);
 int countLetters(char* str);
 void parseSet(struct varBoard *sentinel, char **arguments, int num);
 void parseUnset(struct varBoard *sentinel, char *varKey);
@@ -41,9 +41,14 @@ void main(int argc, char *argv[]) {
 		numOfArguments = 0;
 
 		type_prompt();
+		nullify(arguments);
 		read_command_parameters(arguments);
 		
 		numOfArguments = stringCounter(arguments);
+		
+		if(numOfArguments == 1) {
+			parseVars(arguments, &sentinel);
+		}
 
 		int pipe_pos, out_pos, app_pos, in_pos;
 		pipe_pos = out_pos = app_pos = in_pos = -1;
@@ -52,26 +57,20 @@ void main(int argc, char *argv[]) {
 		app_pos = checkSpecial(arguments, numOfArguments, ">>");
 		in_pos = checkSpecial(arguments, numOfArguments, "<");
 		int lastC = countLetters(arguments[0]);
-		if(numOfArguments == 1) {
-			parseVars(arguments, &sentinel);
-		}
 		if(strcmp(arguments[0], "exit") == 0) {
 			printf("Thank you for using cs345sh :)\n");
-			return;
+			exit(EXIT_SUCCESS);
 		}else if(strcmp(arguments[0], "set") == 0) {
 			parseSet(&sentinel, arguments, numOfArguments);
-			nullify(arguments, numOfArguments);
 		}else if(strcmp(arguments[0], "unset") == 0) {
 			if(arguments[1] != NULL) {
 				parseUnset(&sentinel, arguments[1]);
-				nullify(arguments, numOfArguments);
 			}else{
 				printf("What should I unset?\n");
 				exit(EXIT_FAILURE);
 			}
 		}else if(strcmp(arguments[0], "printlvars") == 0) {
 			printLvars(&sentinel);
-			nullify(arguments, numOfArguments);
 		}else if(out_pos != -1 || app_pos != -1 || in_pos != -1) {
 			char **tempArgs;
 			int max = app_pos;
@@ -103,7 +102,6 @@ void main(int argc, char *argv[]) {
 			}else{
 				wait(&status);
 				fclose(fp);
-				nullify(arguments, numOfArguments);
 			}
 		}else if(arguments[0][lastC - 1] == '&') {
 			arguments[0][lastC - 1] = '\0';
@@ -115,11 +113,9 @@ void main(int argc, char *argv[]) {
 			}else{
 				printf("Process %s with pid %d ", arguments[0], child_pid);
 				printf("is now running in the background\n");
-				nullify(arguments, numOfArguments);
 			}
 		}else if(strcmp(arguments[0], "cd") == 0) {
 			chdir(arguments[1]);
-			nullify(arguments, numOfArguments);
 		}else if(pipe_pos == -1) {
 			pid_t child_pid = fork();
 
@@ -128,7 +124,6 @@ void main(int argc, char *argv[]) {
 				printf("Could not find command %s\n", arguments[0]);
 			}else{
 				wait(&status);
-				nullify(arguments, numOfArguments);				
 			}
 		// PIPE detected
 		}else{
@@ -154,7 +149,6 @@ void main(int argc, char *argv[]) {
 				}	
 			}else{
 				wait(&status);
-				nullify(arguments, numOfArguments);
 			}
 		}	
 	}
@@ -239,9 +233,9 @@ int stringCounter(char **arguments) {
 }
 
 // nullifies arguments array
-void nullify(char **arguments, int num) {
+void nullify(char **arguments) {
 	int i;
-	for(i = 0; i < num; i++)
+	for(i = 0; i < 1000; i++)
 		arguments[i] = NULL;
 }
 
@@ -304,9 +298,14 @@ void parseSet(struct varBoard *sentinel, char **arguments, int num) {
 
 	struct varBoard *traverse = sentinel;
 	int same = 0;
+	struct varBoard *temp;
 	while(1) {
 		if(traverse->next == NULL) break;
-		if(strcmp(traverse->next->varKey, var) == 0) break;
+		if(strcmp(traverse->next->varKey, var) == 0) {
+			same = 1;
+			temp = traverse->next->next;
+			break;
+		}
 		traverse = traverse->next;
 	}
 	// TOD  next for sameO
@@ -315,6 +314,7 @@ void parseSet(struct varBoard *sentinel, char **arguments, int num) {
 	for(i = 0; i < num - 1; i++)
 		strcpy((char*)(traverse->next->varVal[i]), newArgs[i]);
 	strcpy((char*)traverse->next->varVal[num - 1], "\0");
+	if(same)traverse->next->next = temp;
 }
 
 void parseUnset(struct varBoard *sentinel, char *varKey) {
