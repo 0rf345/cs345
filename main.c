@@ -269,6 +269,16 @@ void parseSet(struct varBoard *sentinel, char **arguments, int num) {
 	char *var = (char*)malloc(sizeof(char) * 100);
 	int i = 0;
 	while(1) {
+		char c = argument[1][i];
+		if(c == '@' || c == '!' || c == '#' || c == '$' || c == '%' ||
+		c == '&' || c == '\'' || c == '\"' || c == '(' || c == ')' ||
+		c == '*' || c == '+' || c == ';' || c == '<' || c == '>' ||
+		c == ':' || c == '-' || c == '~' || c == '^' || c == '|' ||
+		c == '[' || c == ']' || c == '{' || c == '}' || c == '\\' ||
+		c == '/' || c == '.' || ',') {
+			printf("Char %c found in var name.\n", c);
+			return;
+		}
 		var[i] = arguments[1][i];
 		i++;
 		if(arguments[1][i] == '=') 	
