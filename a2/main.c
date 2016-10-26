@@ -44,7 +44,53 @@ void *thread_runner(void* arg) {
 
 	for(ty = 0; ty < 10; ty++) {
 		for(tx = 0; tx < 10; tx++) {
-			work->tableN[y][x] = work->table[y][x];
+			int neighbours = 0;
+		
+			// if there is a line above
+			if(y - 1 > -1) {
+				if(work->table[y-1][x] == '1')
+					neighbours++;
+				if(x-1 > -1 && work->table[y-1][x-1] == '1')
+					neighbours++;
+				if(x+1 < 100 && work->table[y-1][x+1] == '1')
+					neighbours++;
+			}
+			
+			// same line
+			if(x-1 > -1 && work->table[y][x-1] == '1')
+				neighbours++;
+			if(x+1 < 100 && work->table[y][x+1] == '1')
+				neighbours++;
+
+			// if there is a line bellow
+			if(y + 1 < 100) {
+				if(work->table[y+1][x] == '1')
+					neighbours++;
+				if(x-1 > -1 && work->table[y+1][x-1] == '1')
+					neighbours++;
+				if(x+1 < 100 && work->table[y+1][x+1] == '1')
+					neighbours++;
+
+			}
+
+			// if cell is alive
+			if(work->table[y][x] == '1') {
+				if(neighbours < 2 || neighbours > 3)
+					work->tableN[y][x] = '0'; // DIE
+				else
+					work->tableN[y][x] = '1'; // Staying allive.. Ah Ah Ah ahhh...
+			}
+			// if cell is dead
+			else {
+				if(neighbours == 3)
+					work->tableN[y][x] = '1'; // It's alive!
+				else
+					work->tableN[y][x] = '0'; // Better luck next time
+			}
+			
+			//work->tableN[y][x] = work->table[y][x];
+
+
 			x++;
 		}
 		x = xS;
