@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-//#include <pthread.h>
+#include <pthread.h>
 
 struct table_str {
 	char table[100][100];
@@ -25,7 +25,7 @@ void *thread_runner(void* arg) {
 	}	
 	int index = i;
 	int y,x;
-	y = (index * 10) / 100; // TODO: work on index > 9
+	y = (index * 10) / 100; 
 	x = (index * 10) % 100;
 
 	int xS = x;
@@ -43,6 +43,31 @@ void *thread_runner(void* arg) {
 		x = xS;
 		y++;
 	}
+	pthread_exit(0);
+}
+
+
+// Prints out the table
+void print_gol(struct table_str *arg_str) {
+	int i, j;
+	for(i = 0; i < 100; i++) {
+		for(j = 0; j < 100; j++)
+			printf("%c ", arg_str->table[i][j]);
+		printf("\n");
+	}
+}
+
+void update_gol(struct table_str *arg_str) {
+	int i, j;
+	for(i = 0; i < 100; i++) 
+		for(j = 0; j < 100; j++)
+			arg_str->table[i][j] = arg_str->tableN[i][j];
+}
+
+void cleanOrder(struct table_str *arg_str) {
+	int i;
+	for(i = 0; i < 100; i++)
+		arg_str->order[i] = 0;
 }
 
 void main(int argc, char **argv) {
@@ -57,17 +82,24 @@ void main(int argc, char **argv) {
 		arg_str->order[i] = 0;
 	}
 
-	for(i = 0; i < 100; i++) {
-		thread_runner((void*)arg_str);
-	}
+	pthread_t tids[100];
+	
+	// Main Loop
+	while(1) {
+		for(i = 0; i < 100; i++) {
+			pthread_attr_t attr;
+			pthread_attr_init(&attr);
+			pthread_create(&(tids[i]), &attr, thread_runner, arg_str);
+		}
 
-	/*
-	// Prints out the table
-	for(i = 0; i < 100; i++) {
-		for(j = 0; j < 100; j++)
-			printf("%c ", arg_str->tableN[i][j]);
-		printf("\n");
+	
+		// Wait until threads are done
+		for(i = 0; i < 100; i++) 
+			pthread_join(tids[i], NULL);
+
+		update_gol(arg_str);
+		system("clear");
+		print_gol(arg_str);
+		cleanOrder(arg_str);
 	}
-	*/
-		
 }
