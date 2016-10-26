@@ -2,6 +2,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <signal.h>
+
+volatile sig_atomic_t STOP = 0;
+
+void time2stop(int sig) {
+	STOP = 1;
+}
 
 struct table_str {
 	char table[100][100];
@@ -50,11 +57,13 @@ void *thread_runner(void* arg) {
 // Prints out the table
 void print_gol(struct table_str *arg_str) {
 	int i, j;
+	printf("\n");
 	for(i = 0; i < 100; i++) {
 		for(j = 0; j < 100; j++)
 			printf("%c ", arg_str->table[i][j]);
 		printf("\n");
 	}
+	printf("\n");
 }
 
 void update_gol(struct table_str *arg_str) {
@@ -71,6 +80,8 @@ void cleanOrder(struct table_str *arg_str) {
 }
 
 void main(int argc, char **argv) {
+
+	signal(SIGINT, time2stop);
 	
 	struct table_str *arg_str;
 	arg_str = (struct table_str*)malloc(sizeof(struct table_str));
@@ -101,5 +112,9 @@ void main(int argc, char **argv) {
 		system("clear");
 		print_gol(arg_str);
 		cleanOrder(arg_str);
+		if(STOP) {
+			printf("I hope you liked this Game Of Life implementation :D.\n");
+			exit(EXIT_SUCCESS);
+		}
 	}
 }
