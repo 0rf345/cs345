@@ -14,7 +14,7 @@ asmlinkage long sys_set_total_c_time(int pid, unsigned int total_time) {
 	success = 0;
 
 	if(pid == -1 || traverse->pid == pid) {
-		printk("Set own PID: %d\n", pid);
+		printk("Set own PID: %d\n", traverse->pid);
 		traverse->total_computation_time = total_time;
 		traverse->remaining_time = total_time;
 		traverse->infinite = 0;
