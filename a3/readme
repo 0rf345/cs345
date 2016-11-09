@@ -4,11 +4,12 @@
 | make all: creates test_n, test_f, test_fail  |
 | make clean: removes above files              |
 |                                              |
+| t_params.h: is needed for compilation        |
 | test_n: normal test                          |
 | test_f: fork test with children              |
 | test_fail: test for failed attempts          |
 ------------------------------------------------
-
+    *WARNING* t_params.h must also be present in the vm
   mak: make ARCH=i386 bzImage
   qem: shortcut for starting qemu for us
   myPatcher: copies all modified files to their
