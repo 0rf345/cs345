@@ -1,0 +1,12 @@
+cp -f unistd_32.h arch/x86/include/asm/
+cp -f syscall_table_32.S arch/x86/kernel/
+cp -f syscalls.h include/asm-generic/
+cp -f set_total_c_time.c kernel/
+cp -f get_total_c_time.c kernel/
+cp -f Makefile kernel/
+cp -f .config kernel/
+cp -f t_params.h include/linux/
+cp -f sched.h include/linux/
+cp -f bzImage arch/x86/boot/
+cp -f qem ../
+
