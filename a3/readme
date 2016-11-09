@@ -1,0 +1,29 @@
+		csd3285
+------------------------------------------------
+| makefile <- for test programs                |
+| make all: creates test_n, test_f, test_fail  |
+| make clean: removes above files              |
+|                                              |
+| test_n: normal test                          |
+| test_f: fork test with children              |
+| test_fail: test for failed attempts          |
+------------------------------------------------
+
+  mak: make ARCH=i386 bzImage
+  qem: shortcut for starting qemu for us
+  myPatcher: copies all modified files to their
+	destinations, assumes that they are
+  	currently in the linux folder
+
+  The rest of the files are either modified 
+  pre-existing files or new ones for the 
+  purposes of this exercise.
+
+	Usability
+
+  Copy all files in linux folder
+  Run myPatcher
+  Run mak
+  cd ../
+  run qem
+  get test programs in vm and make all
