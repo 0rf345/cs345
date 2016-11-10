@@ -64,7 +64,7 @@ asmlinkage long sys_set_total_c_time(int pid, unsigned int total_time);
 #endif
 
 #ifndef sys_get_total_c_time
-asmlinkage long sys_get_total_c_time(int pid, struct t_params *t_arguments);
+asmlinkage long sys_get_remaining_time(int pid, struct t_params *t_arguments);
 #endif
 
 #endif /* __ASM_GENERIC_SYSCALLS_H */

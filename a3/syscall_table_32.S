@@ -342,4 +342,4 @@ ENTRY(sys_call_table)
 	.long sys_prlimit64		/* 340 */
 	.long sys_dummy_sys		/* 341 */
 	.long sys_set_total_c_time	/* 342 */
-	.long sys_get_total_c_time	/* 343 */ 
+	.long sys_get_remaining_time	/* 343 */ 

@@ -350,7 +350,7 @@
 /* My syscalls */
 #define __NR_dummy_sys		341
 #define __NR_set_total_c_time	342
-#define __NT_get_total_c_time	343
+#define __NT_get_remaining_time	343
 
 
 #ifdef __KERNEL__
