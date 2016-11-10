@@ -2,7 +2,7 @@
 #include <linux/syscalls.h>
 #include <asm/uaccess.h>
 #include <linux/t_params.h>
-asmlinkage long sys_get_total_c_time(int pid, struct t_params *t_arguments) {
+asmlinkage long sys_get_remaining_time(int pid, struct t_params *t_arguments) {
 	struct task_struct *i;
 	printk("sys_get_total_c_time running. AM:3285\n");
 	if(t_arguments == NULL) {
