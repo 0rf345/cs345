@@ -7,14 +7,14 @@
  */
 
 // Returns the task_struct* on success, NULL on failure
-struct task_struct *check_parents_rec(struct task_struct task, int pid) {
+struct task_struct *check_parents_rec(struct task_struct *task, int pid) {
 	if(task == NULL) {
 		return NULL;
 	}
 	if(pid == task->pid) {
 		return task;
 	}else{
-		return check_parents_rec(task->p_pptr, pid);
+		return check_parents_rec(task->real_parent, pid);
 	}
 }
 
@@ -24,7 +24,7 @@ asmlinkage long sys_set_total_c_time(int pid, unsigned int total_time) {
 	struct task_struct *current_task;
 	current_task = get_current();
 	if(pid == 0 || pid < -1) {
-		printk("ERROR pid was %d\n");
+		printk("ERROR pid was %d\n", pid);
 		return EINVAL;
 	}
 	if(pid == -1 || current_task->pid == pid) {
@@ -38,7 +38,7 @@ asmlinkage long sys_set_total_c_time(int pid, unsigned int total_time) {
 		parent = NULL;
 		for_each_process(traverse) {
 			if(traverse->pid == pid) { 
-				parent = check_parents_rec(traverse->p_pptr, current_task->pid);
+				parent = check_parents_rec(traverse->real_parent, current_task->pid);
 				if(parent == NULL) {
 					printk("ERROR. No access to set PID: %d\n", pid);
 					return EINVAL;
