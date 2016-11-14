@@ -25,8 +25,8 @@ asmlinkage long sys_get_remaining_time(int pid, struct t_params *t_arguments) {
 		printk("PID was %d\n", pid);
 		return EINVAL;
 	}
-    struct task_struct *parent;
-    parent = NULL;
+	struct task_struct *parent;
+ 	parent = NULL;
 	for_each_process(i) {
 		if(i->pid == pid) {
             parent = check_parents_rec(traverse->real_parent, current_task->pid);
