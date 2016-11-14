@@ -9,8 +9,8 @@ asmlinkage long sys_get_remaining_time(int pid, struct t_params *t_arguments) {
 		printk("t_arguments was NULL\n");
 		return EINVAL;
 	}
-	if(pid == -1) {
-		printk("PID was -1\n");
+	if(pid <= -1) {
+		printk("PID was %d\n", pid);
 		return EINVAL;
 	}
 	for_each_process(i) {
